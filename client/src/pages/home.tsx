@@ -60,6 +60,14 @@ export default function Home() {
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
               {t("hero.subtitle")}
             </p>
+            
+            <div className="pt-6">
+              <Link href="/create-ad">
+                <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white text-xl px-12 py-8 h-auto rounded-full shadow-lg shadow-red-900/20 transition-all hover:scale-105">
+                  {t("cust.createNew")}
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
 
