@@ -1,16 +1,29 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, boolean, jsonb, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Session storage table (required for Replit Auth)
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User table (modified for Replit Auth)
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").notNull().unique(),
-  password: text("password").notNull(),
-  name: text("name").notNull(),
-  role: varchar("role", { enum: ["customer", "influencer"] }).notNull(),
-  avatar: text("avatar"),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  role: varchar("role", { enum: ["customer", "influencer"] }).default("customer"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const influencers = pgTable("influencers", {
@@ -45,11 +58,6 @@ export const campaignRequests = pgTable("campaign_requests", {
 });
 
 // Zod schemas
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-});
-
 export const insertInfluencerSchema = createInsertSchema(influencers).omit({
   id: true,
 });
@@ -66,11 +74,11 @@ export const insertCampaignRequestSchema = createInsertSchema(campaignRequests).
 
 // Types
 export type User = typeof users.$inferSelect;
+export type UpsertUser = typeof users.$inferInsert;
 export type Influencer = typeof influencers.$inferSelect;
 export type Campaign = typeof campaigns.$inferSelect;
 export type CampaignRequest = typeof campaignRequests.$inferSelect;
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertInfluencer = z.infer<typeof insertInfluencerSchema>;
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 export type InsertCampaignRequest = z.infer<typeof insertCampaignRequestSchema>;
