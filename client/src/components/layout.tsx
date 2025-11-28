@@ -29,8 +29,8 @@ export function Navbar() {
   const [, setLocation] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     setLocation("/");
     setIsOpen(false);
   };

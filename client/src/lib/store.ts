@@ -25,6 +25,7 @@ interface AppState {
   setIsLoading: (loading: boolean) => void;
   saveAdFormData: (data: AdFormData) => void;
   clearAdFormData: () => void;
+  logout: () => Promise<void>;
 }
 
 export const useUser = create<AppState>((set) => ({
@@ -34,5 +35,13 @@ export const useUser = create<AppState>((set) => ({
   setUser: (user) => set({ user }),
   setIsLoading: (isLoading) => set({ isLoading }),
   saveAdFormData: (data) => set({ adFormData: data }),
-  clearAdFormData: () => set({ adFormData: null })
+  clearAdFormData: () => set({ adFormData: null }),
+  logout: async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+    set({ user: null, adFormData: null });
+  }
 }));
