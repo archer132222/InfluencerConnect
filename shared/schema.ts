@@ -74,6 +74,19 @@ export const campaignRequests = pgTable("campaign_requests", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const messages = pgTable("messages", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  senderId: varchar("sender_id")
+    .notNull()
+    .references(() => users.id),
+  subject: text("subject").notNull(),
+  content: text("content").notNull(),
+  status: varchar("status", { enum: ["unread", "read"] }).default("unread"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Zod schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -96,13 +109,21 @@ export const insertCampaignRequestSchema = createInsertSchema(
   createdAt: true,
 });
 
+export const insertMessageSchema = createInsertSchema(messages).omit({
+  id: true,
+  createdAt: true,
+  status: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type Influencer = typeof influencers.$inferSelect;
 export type Campaign = typeof campaigns.$inferSelect;
 export type CampaignRequest = typeof campaignRequests.$inferSelect;
+export type Message = typeof messages.$inferSelect;
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertInfluencer = z.infer<typeof insertInfluencerSchema>;
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
 export type InsertCampaignRequest = z.infer<typeof insertCampaignRequestSchema>;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;

@@ -1,7 +1,7 @@
 import { db } from "./db";
-import { users, influencers, campaigns, campaignRequests, insertUserSchema, insertInfluencerSchema, insertCampaignSchema, insertCampaignRequestSchema } from "@shared/schema";
-import type { User, Influencer, Campaign, CampaignRequest, InsertUser, InsertInfluencer, InsertCampaign, InsertCampaignRequest } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { users, influencers, campaigns, campaignRequests, messages, insertUserSchema, insertInfluencerSchema, insertCampaignSchema, insertCampaignRequestSchema, insertMessageSchema } from "@shared/schema";
+import type { User, Influencer, Campaign, CampaignRequest, Message, InsertUser, InsertInfluencer, InsertCampaign, InsertCampaignRequest, InsertMessage } from "@shared/schema";
+import { eq, and, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -25,6 +25,12 @@ export interface IStorage {
   getCampaignRequestsByInfluencer(influencerId: string): Promise<(CampaignRequest & { campaign: Campaign })[]>;
   getCampaignRequestsByCampaign(campaignId: string): Promise<(CampaignRequest & { influencer: Influencer & { user: User } })[]>;
   updateCampaignRequestStatus(id: string, status: string): Promise<CampaignRequest | undefined>;
+
+  // Messages
+  createMessage(message: InsertMessage): Promise<Message>;
+  getAllMessages(): Promise<(Message & { sender: User })[]>;
+  getMessagesBySender(senderId: string): Promise<(Message & { sender: User })[]>;
+  updateMessageStatus(id: string, status: string): Promise<Message | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -116,6 +122,39 @@ export class DatabaseStorage implements IStorage {
       .update(campaignRequests)
       .set({ status: status as any })
       .where(eq(campaignRequests.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async createMessage(message: InsertMessage): Promise<Message> {
+    const result = await db.insert(messages).values(message).returning();
+    return result[0];
+  }
+
+  async getAllMessages(): Promise<(Message & { sender: User })[]> {
+    const result = await db
+      .select()
+      .from(messages)
+      .leftJoin(users, eq(messages.senderId, users.id))
+      .orderBy(desc(messages.createdAt));
+    return result.map(r => ({ ...r.messages!, sender: r.users! }));
+  }
+
+  async getMessagesBySender(senderId: string): Promise<(Message & { sender: User })[]> {
+    const result = await db
+      .select()
+      .from(messages)
+      .leftJoin(users, eq(messages.senderId, users.id))
+      .where(eq(messages.senderId, senderId))
+      .orderBy(desc(messages.createdAt));
+    return result.map(r => ({ ...r.messages!, sender: r.users! }));
+  }
+
+  async updateMessageStatus(id: string, status: string): Promise<Message | undefined> {
+    const result = await db
+      .update(messages)
+      .set({ status: status as any })
+      .where(eq(messages.id, id))
       .returning();
     return result[0];
   }

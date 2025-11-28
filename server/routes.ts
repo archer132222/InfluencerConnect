@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertInfluencerSchema, insertCampaignSchema } from "@shared/schema";
+import { insertUserSchema, insertInfluencerSchema, insertCampaignSchema, insertMessageSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 
 export async function registerRoutes(
@@ -192,6 +192,57 @@ export async function registerRoutes(
         return res.status(404).json({ error: "Request not found" });
       }
       res.json(request);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Message Routes
+  app.post("/api/messages", async (req, res) => {
+    try {
+      const senderId = (req.session as any)?.userId;
+      if (!senderId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const parsed = insertMessageSchema.parse({
+        senderId,
+        ...req.body,
+      });
+
+      const message = await storage.createMessage(parsed);
+      res.json(message);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/messages", async (req, res) => {
+    try {
+      const messages = await storage.getAllMessages();
+      res.json(messages);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/messages/user/:senderId", async (req, res) => {
+    try {
+      const messages = await storage.getMessagesBySender(req.params.senderId);
+      res.json(messages);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/messages/:id/status", async (req, res) => {
+    try {
+      const { status } = req.body;
+      const message = await storage.updateMessageStatus(req.params.id, status);
+      if (!message) {
+        return res.status(404).json({ error: "Message not found" });
+      }
+      res.json(message);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
