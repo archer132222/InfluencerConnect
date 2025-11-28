@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@/lib/store";
 import { useLanguage } from "@/lib/i18n";
 import { useLocation, Link } from "wouter";
@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Navbar } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function Register() {
-  const { login, isLoading } = useUser();
+  const { login, isLoading, adFormData, clearAdFormData } = useUser();
   const { t } = useLanguage();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<"customer" | "influencer">("customer");
@@ -50,6 +50,7 @@ export default function Register() {
     login(activeTab);
     setTimeout(() => {
       setLocation(activeTab === 'influencer' ? '/influencer-dashboard' : '/customer-dashboard');
+      clearAdFormData();
     }, 900);
   };
 
@@ -70,6 +71,16 @@ export default function Register() {
             <p className="text-sm text-gray-400">{t("auth.createAccount.subtitle")}</p>
           </CardHeader>
           <CardContent className="space-y-6">
+            {adFormData && (
+              <div className="bg-green-500/10 border border-green-500/20 p-3 rounded-lg flex items-start gap-2">
+                <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-green-600">
+                  <p className="font-medium mb-1">Ad details saved!</p>
+                  <p className="text-xs text-green-600/80">We've saved your ad information. Complete your signup to submit it.</p>
+                </div>
+              </div>
+            )}
+
             <Tabs defaultValue="customer" onValueChange={(v) => setActiveTab(v as any)} className="w-full">
               <TabsList className="grid w-full grid-cols-2 bg-[#2A2A2A]">
                 <TabsTrigger value="customer" className="data-[state=active]:bg-white data-[state=active]:text-black">{t("auth.brand")}</TabsTrigger>

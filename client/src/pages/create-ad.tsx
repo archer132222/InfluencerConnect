@@ -4,21 +4,44 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
+import { useUser } from "@/lib/store";
 
 export default function CreateAd() {
   const [, setLocation] = useLocation();
+  const { user, saveAdFormData } = useUser();
   const [step, setStep] = useState(1);
   const { t } = useLanguage();
+
+  const [formData, setFormData] = useState({
+    productName: "",
+    productDesc: "",
+    targetAudience: "",
+    platform: ""
+  });
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleNext = () => {
     if (step < 2) {
       setStep(step + 1);
     } else {
       // Submit
-      setLocation('/customer-dashboard');
+      if (!user) {
+        // User not signed in - save form data and redirect to register
+        saveAdFormData(formData);
+        setLocation('/register');
+      } else {
+        // User is signed in - allow submission
+        setLocation('/customer-dashboard');
+      }
     }
   };
 
@@ -44,6 +67,8 @@ export default function CreateAd() {
                   <Input 
                     className="bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 focus:border-red-500/50" 
                     placeholder="Ex: Luxury Perfume Bottle" 
+                    value={formData.productName}
+                    onChange={(e) => handleInputChange('productName', e.target.value)}
                   />
                 </div>
                 
@@ -52,6 +77,8 @@ export default function CreateAd() {
                   <Textarea 
                     className="bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 min-h-[100px] focus:border-red-500/50" 
                     placeholder="Ex: A new fragrance for women, floral scent..." 
+                    value={formData.productDesc}
+                    onChange={(e) => handleInputChange('productDesc', e.target.value)}
                   />
                 </div>
 
@@ -60,6 +87,8 @@ export default function CreateAd() {
                   <Input 
                     className="bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 focus:border-red-500/50" 
                     placeholder="Ex: Women 20-40 years old" 
+                    value={formData.targetAudience}
+                    onChange={(e) => handleInputChange('targetAudience', e.target.value)}
                   />
                 </div>
 
@@ -68,6 +97,8 @@ export default function CreateAd() {
                   <Input 
                     className="bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 focus:border-red-500/50" 
                     placeholder="Ex: TikTok, Instagram" 
+                    value={formData.platform}
+                    onChange={(e) => handleInputChange('platform', e.target.value)}
                   />
                 </div>
               </div>
@@ -83,17 +114,24 @@ export default function CreateAd() {
                 <div className="bg-[#2A2A2A] p-4 rounded-lg space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-400">{t("common.product")}:</span>
-                    <span className="font-medium">Luxury Perfume Bottle</span>
+                    <span className="font-medium">{formData.productName || "N/A"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">{t("ad.platform")}:</span>
-                    <span className="font-medium">TikTok</span>
+                    <span className="font-medium">{formData.platform || "N/A"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">{t("ad.budget")}:</span>
                     <span className="font-medium text-green-400">{t("ad.pending")}</span>
                   </div>
                 </div>
+
+                {!user && (
+                  <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg text-sm text-yellow-600">
+                    <p className="font-medium mb-2">{t("auth.noAccount")}</p>
+                    <p className="text-xs text-yellow-600/80">Your ad details will be saved and you can complete the submission after signing up.</p>
+                  </div>
+                )}
               </div>
             )}
 

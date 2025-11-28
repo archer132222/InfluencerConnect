@@ -10,16 +10,27 @@ interface User {
   avatar?: string;
 }
 
+interface AdFormData {
+  productName: string;
+  productDesc: string;
+  targetAudience: string;
+  platform: string;
+}
+
 interface AppState {
   user: User | null;
   isLoading: boolean;
+  adFormData: AdFormData | null;
   login: (role: UserRole) => void;
   logout: () => void;
+  saveAdFormData: (data: AdFormData) => void;
+  clearAdFormData: () => void;
 }
 
 export const useUser = create<AppState>((set) => ({
   user: null,
   isLoading: false,
+  adFormData: null,
   login: (role) => {
     set({ isLoading: true });
     // Simulate API call
@@ -36,5 +47,7 @@ export const useUser = create<AppState>((set) => ({
       });
     }, 800);
   },
-  logout: () => set({ user: null })
+  logout: () => set({ user: null }),
+  saveAdFormData: (data) => set({ adFormData: data }),
+  clearAdFormData: () => set({ adFormData: null })
 }));
