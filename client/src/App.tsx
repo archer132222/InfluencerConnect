@@ -12,6 +12,7 @@ import CustomerDashboard from "@/pages/customer-dashboard";
 import CreateAd from "@/pages/create-ad";
 import InfluencerProfile from "@/pages/influencer-profile";
 import ContactAdmin from "@/pages/contact-admin";
+import Support from "@/pages/support";
 
 function Router() {
   return (
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/create-ad" component={CreateAd} />
       <Route path="/profile/:id" component={InfluencerProfile} />
       <Route path="/contact-admin" component={ContactAdmin} />
+      <Route path="/support" component={Support} />
       <Route component={NotFound} />
     </Switch>
   );

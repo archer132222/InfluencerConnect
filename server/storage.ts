@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { users, influencers, campaigns, campaignRequests, messages, insertUserSchema, insertInfluencerSchema, insertCampaignSchema, insertCampaignRequestSchema, insertMessageSchema } from "@shared/schema";
-import type { User, Influencer, Campaign, CampaignRequest, Message, InsertUser, InsertInfluencer, InsertCampaign, InsertCampaignRequest, InsertMessage } from "@shared/schema";
+import { users, influencers, campaigns, campaignRequests, messages, supportTickets, insertUserSchema, insertInfluencerSchema, insertCampaignSchema, insertCampaignRequestSchema, insertMessageSchema, insertSupportTicketSchema } from "@shared/schema";
+import type { User, Influencer, Campaign, CampaignRequest, Message, SupportTicket, InsertUser, InsertInfluencer, InsertCampaign, InsertCampaignRequest, InsertMessage, InsertSupportTicket } from "@shared/schema";
 import { eq, and, desc } from "drizzle-orm";
 
 export interface IStorage {
@@ -31,6 +31,10 @@ export interface IStorage {
   getAllMessages(): Promise<(Message & { sender: User })[]>;
   getMessagesBySender(senderId: string): Promise<(Message & { sender: User })[]>;
   updateMessageStatus(id: string, status: string): Promise<Message | undefined>;
+
+  // Support Tickets
+  createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
+  getAllSupportTickets(): Promise<SupportTicket[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -157,6 +161,15 @@ export class DatabaseStorage implements IStorage {
       .where(eq(messages.id, id))
       .returning();
     return result[0];
+  }
+
+  async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
+    const result = await db.insert(supportTickets).values(ticket).returning();
+    return result[0];
+  }
+
+  async getAllSupportTickets(): Promise<SupportTicket[]> {
+    return db.select().from(supportTickets).orderBy(desc(supportTickets.createdAt));
   }
 }
 

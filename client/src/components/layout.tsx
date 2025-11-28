@@ -10,8 +10,7 @@ import {
   Menu, 
   Globe,
   Bell,
-  MessageSquare,
-  CheckCircle2
+  Headset
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -162,6 +161,13 @@ export function Navbar() {
                   </DropdownMenu>
                 )}
 
+                {/* Support Button */}
+                <Link href="/support">
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white" data-testid="button-support">
+                    <Headset className="h-4 w-4" />
+                  </Button>
+                </Link>
+
                 <Link href={user.role === 'influencer' ? '/influencer-dashboard' : '/customer-dashboard'}>
                   <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white">
                     <LayoutDashboard className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
@@ -252,6 +258,13 @@ export function Navbar() {
                           )}
                         </div>
                       )}
+
+                      <Link href="/support" onClick={() => setIsOpen(false)}>
+                        <Button variant="ghost" className="w-full justify-start text-white hover:bg-white/10 hover:text-white">
+                          <Headset className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
+                          Support
+                        </Button>
+                      </Link>
 
                       <Link href={user.role === 'influencer' ? '/influencer-dashboard' : '/customer-dashboard'} onClick={() => setIsOpen(false)}>
                         <Button variant="ghost" className="w-full justify-start text-white hover:bg-white/10 hover:text-white">

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertInfluencerSchema, insertCampaignSchema, insertMessageSchema } from "@shared/schema";
+import { insertUserSchema, insertInfluencerSchema, insertCampaignSchema, insertMessageSchema, insertSupportTicketSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 
 export async function registerRoutes(
@@ -243,6 +243,32 @@ export async function registerRoutes(
         return res.status(404).json({ error: "Message not found" });
       }
       res.json(message);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  // Support Ticket Routes
+  app.post("/api/support-tickets", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      
+      const parsed = insertSupportTicketSchema.parse({
+        userId: userId || null,
+        ...req.body,
+      });
+
+      const ticket = await storage.createSupportTicket(parsed);
+      res.json(ticket);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/support-tickets", async (req, res) => {
+    try {
+      const tickets = await storage.getAllSupportTickets();
+      res.json(tickets);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
     }
