@@ -3,8 +3,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import session from "express-session";
-import ConnectPgSimple from "connect-pg-simple";
-import { neon } from "@neondatabase/serverless";
+import MemoryStore from "memorystore";
 
 const app = express();
 const httpServer = createServer(app);
@@ -23,15 +22,11 @@ declare module "express-session" {
 }
 
 // Session setup
-const pgSession = ConnectPgSimple(session);
-const sql = neon(process.env.DATABASE_URL || "");
+const memStore = MemoryStore(session);
 
 app.use(
   session({
-    store: new pgSession({
-      pool: sql,
-      tableName: "session",
-    }),
+    store: new memStore(),
     secret: process.env.SESSION_SECRET || "your-secret-key",
     resave: false,
     saveUninitialized: false,
