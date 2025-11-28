@@ -1,20 +1,47 @@
 import { useState } from "react";
 import { useUser } from "@/lib/store";
+import { useLanguage } from "@/lib/i18n";
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Navbar } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
-import { useLanguage } from "@/lib/i18n";
+import { Loader2, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function Login() {
   const { login, isLoading } = useUser();
   const { t } = useLanguage();
   const [, setLocation] = useLocation();
+  
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{email?: string, password?: string}>({});
 
-  const handleLogin = (role: 'influencer' | 'customer') => {
+  const validate = () => {
+    const newErrors: {email?: string, password?: string} = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (!email || !emailRegex.test(email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+    
+    if (!password || password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleLogin = () => {
+    if (!validate()) return;
+
+    // Mock logic: emails containing "inf" or "omar" are influencers, others are brands
+    const role = (email.toLowerCase().includes('inf') || email.toLowerCase().includes('omar')) 
+      ? 'influencer' 
+      : 'customer';
+
     login(role);
     setTimeout(() => {
       setLocation(role === 'influencer' ? '/influencer-dashboard' : '/customer-dashboard');
@@ -37,37 +64,46 @@ export default function Login() {
                 <Input 
                   type="email" 
                   placeholder="name@example.com" 
-                  className="bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 focus:border-red-500/50 focus:ring-red-500/20"
+                  className={`bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 focus:border-red-500/50 focus:ring-red-500/20 ${errors.email ? "border-red-500" : ""}`}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email) setErrors({...errors, email: undefined});
+                  }}
                 />
+                {errors.email && (
+                  <p className="text-xs text-red-500 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" /> {errors.email}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">{t("auth.password")}</label>
                 <Input 
                   type="password" 
                   placeholder="••••••••" 
-                  className="bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 focus:border-red-500/50 focus:ring-red-500/20"
+                  className={`bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 focus:border-red-500/50 focus:ring-red-500/20 ${errors.password ? "border-red-500" : ""}`}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password) setErrors({...errors, password: undefined});
+                  }}
                 />
+                {errors.password && (
+                  <p className="text-xs text-red-500 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" /> {errors.password}
+                  </p>
+                )}
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Button 
-                onClick={() => handleLogin('customer')} 
-                disabled={isLoading}
-                className="bg-white text-black hover:bg-gray-200 w-full"
-              >
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t("auth.asBrand")}
-              </Button>
-              <Button 
-                onClick={() => handleLogin('influencer')} 
-                disabled={isLoading}
-                className="bg-red-600 text-white hover:bg-red-700 w-full border-none"
-              >
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t("auth.asInfluencer")}
-              </Button>
-            </div>
+            <Button 
+              onClick={handleLogin} 
+              disabled={isLoading}
+              className="w-full bg-red-600 text-white hover:bg-red-700 border-none"
+            >
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t("auth.signIn.title")}
+            </Button>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
