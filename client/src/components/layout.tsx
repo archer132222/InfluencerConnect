@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@/lib/store";
 import { useLanguage } from "@/lib/i18n";
 import { Link, useLocation } from "wouter";
@@ -8,7 +8,10 @@ import {
   PlusCircle, 
   User, 
   Menu, 
-  Globe
+  Globe,
+  Bell,
+  MessageSquare,
+  CheckCircle2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +31,30 @@ export function Navbar() {
   const { language, setLanguage, t } = useLanguage();
   const [, setLocation] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [recentNotifications, setRecentNotifications] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch(`/api/campaign-requests/influencer/${user?.id}`);
+      if (response.ok) {
+        const requests = await response.json();
+        const pendingRequests = requests.filter((req: any) => req.status === 'pending');
+        setNotificationCount(pendingRequests.length);
+        setRecentNotifications(pendingRequests.slice(0, 3));
+      }
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -82,6 +109,59 @@ export function Navbar() {
                     </Button>
                   </Link>
                 )}
+
+                {/* Notifications Dropdown */}
+                {user.role === 'influencer' && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-white hover:bg-white/10 relative"
+                        data-testid="button-notifications"
+                      >
+                        <Bell className="h-4 w-4" />
+                        {notificationCount > 0 && (
+                          <span className="absolute top-0 right-0 h-5 w-5 bg-red-500 rounded-full text-xs font-bold flex items-center justify-center text-white">
+                            {notificationCount > 9 ? '9+' : notificationCount}
+                          </span>
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-slate-800 border-slate-600 text-white w-72">
+                      <div className="p-3 border-b border-slate-600">
+                        <h3 className="font-semibold text-sm flex items-center gap-2">
+                          <Bell className="h-4 w-4" />
+                          Pending Requests
+                        </h3>
+                      </div>
+                      {recentNotifications.length > 0 ? (
+                        <>
+                          {recentNotifications.map((notif) => (
+                            <DropdownMenuItem 
+                              key={notif.id} 
+                              className="p-3 hover:bg-slate-700 cursor-pointer flex flex-col items-start"
+                              data-testid={`notification-item-${notif.id}`}
+                            >
+                              <p className="text-sm font-medium">{notif.campaign?.productName}</p>
+                              <p className="text-xs text-slate-400">Budget: ${notif.budget}</p>
+                            </DropdownMenuItem>
+                          ))}
+                          <DropdownMenuItem className="p-2 border-t border-slate-600 hover:bg-slate-700">
+                            <Link href="/influencer-dashboard" className="text-xs text-center w-full">
+                              View all requests
+                            </Link>
+                          </DropdownMenuItem>
+                        </>
+                      ) : (
+                        <div className="p-4 text-center text-slate-400 text-sm">
+                          No pending requests
+                        </div>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+
                 <Link href={user.role === 'influencer' ? '/influencer-dashboard' : '/customer-dashboard'}>
                   <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white">
                     <LayoutDashboard className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
@@ -145,6 +225,34 @@ export function Navbar() {
                         </div>
                       </div>
                       
+                      {user.role === 'influencer' && (
+                        <div className="px-4 py-3 border-b border-white/10">
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="text-sm font-semibold flex items-center gap-2">
+                              <Bell className="h-4 w-4" />
+                              Notifications
+                              {notificationCount > 0 && (
+                                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                                  {notificationCount}
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                          {recentNotifications.length > 0 ? (
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                              {recentNotifications.map((notif) => (
+                                <div key={notif.id} className="text-xs bg-slate-700/30 p-2 rounded border border-slate-600">
+                                  <p className="font-medium">{notif.campaign?.productName}</p>
+                                  <p className="text-slate-400">Budget: ${notif.budget}</p>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-slate-400">No pending requests</p>
+                          )}
+                        </div>
+                      )}
+
                       <Link href={user.role === 'influencer' ? '/influencer-dashboard' : '/customer-dashboard'} onClick={() => setIsOpen(false)}>
                         <Button variant="ghost" className="w-full justify-start text-white hover:bg-white/10 hover:text-white">
                           <LayoutDashboard className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
