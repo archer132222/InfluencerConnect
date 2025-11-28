@@ -10,6 +10,7 @@ import Register from "@/pages/register";
 import InfluencerDashboard from "@/pages/influencer-dashboard";
 import CustomerDashboard from "@/pages/customer-dashboard";
 import CreateAd from "@/pages/create-ad";
+import InfluencerProfile from "@/pages/influencer-profile";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/influencer-dashboard" component={InfluencerDashboard} />
       <Route path="/customer-dashboard" component={CustomerDashboard} />
       <Route path="/create-ad" component={CreateAd} />
+      <Route path="/profile/:id" component={InfluencerProfile} />
       <Route component={NotFound} />
     </Switch>
   );

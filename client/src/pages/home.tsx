@@ -10,6 +10,7 @@ export default function Home() {
   
   const influencers = [
     {
+      id: 1,
       name: language === 'ar' ? "أحمد جلال" : "Ahmed Jalal",
       category: "Tech",
       product: language === 'ar' ? "هاتف ذكي" : "New Smartphone",
@@ -17,6 +18,7 @@ export default function Home() {
       image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
     },
     {
+      id: 2,
       name: language === 'ar' ? "عمر شعلان" : "Omar Shalan",
       category: "Gaming",
       product: language === 'ar' ? "لعبة جديدة" : "New Game",
@@ -24,6 +26,7 @@ export default function Home() {
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
     },
     {
+      id: 3,
       name: language === 'ar' ? "سارة ويلسون" : "Sarah Wilson",
       category: "Fashion",
       product: language === 'ar' ? "عطر فاخر" : "Luxury Perfume",
@@ -31,6 +34,7 @@ export default function Home() {
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
     },
     {
+      id: 4,
       name: language === 'ar' ? "مايك جونسون" : "Mike Johnson",
       category: "Tech",
       product: language === 'ar' ? "ساعة ذكية" : "Smart Watch",
@@ -56,18 +60,6 @@ export default function Home() {
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
               {t("hero.subtitle")}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Link href="/register">
-                <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-6 h-auto">
-                  {t("nav.createAccount")}
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-black text-lg px-8 py-6 h-auto">
-                  {t("nav.signIn")}
-                </Button>
-              </Link>
-            </div>
           </div>
         </section>
 
@@ -79,8 +71,12 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {influencers.map((influencer, index) => (
-              <InfluencerCard key={index} {...influencer} />
+            {influencers.map((influencer) => (
+              <Link key={influencer.id} href={`/profile/${influencer.id}`}>
+                <div className="cursor-pointer block h-full">
+                  <InfluencerCard {...influencer} />
+                </div>
+              </Link>
             ))}
           </div>
           
