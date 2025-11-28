@@ -1,13 +1,12 @@
 import { Navbar } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { 
   Briefcase, 
   Clock, 
   CheckCircle2, 
   Star, 
-  Settings,
   ChevronDown,
   Video
 } from "lucide-react";
@@ -17,8 +16,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useLanguage } from "@/lib/i18n";
 
 export default function InfluencerDashboard() {
+  const { t, language } = useLanguage();
+
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
@@ -40,10 +42,10 @@ export default function InfluencerDashboard() {
               </div>
               
               <div className="mt-4 space-y-2">
-                <h1 className="text-2xl font-display font-bold">Omar Shalan</h1>
+                <h1 className="text-2xl font-display font-bold">{language === 'ar' ? "عمر شعلان" : "Omar Shalan"}</h1>
                 <div className="flex items-center justify-center gap-4 text-sm text-gray-400">
-                  <span>Category: <span className="text-white">Gaming</span></span>
-                  <span>Followers: <span className="text-white">350K</span></span>
+                  <span>{t("inf.category")}: <span className="text-white">Gaming</span></span>
+                  <span>{t("inf.followers")}: <span className="text-white">350K</span></span>
                 </div>
               </div>
 
@@ -51,18 +53,18 @@ export default function InfluencerDashboard() {
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="portfolio" className="border-white/10">
                     <AccordionTrigger className="text-white hover:no-underline hover:text-red-400 justify-center gap-2">
-                      Previous Ads / Portfolio
+                      {t("inf.portfolio")}
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="bg-[#2A2A2A] rounded-lg p-4 mt-2 text-left">
+                      <div className="bg-[#2A2A2A] rounded-lg p-4 mt-2 text-left rtl:text-right">
                         <div className="flex items-start gap-4">
                           <div className="h-20 w-32 bg-black/50 rounded flex items-center justify-center">
                             <Video className="h-8 w-8 text-gray-600" />
                           </div>
                           <div className="space-y-1">
                             <h4 className="font-medium text-red-200">Energy Drink Campaign</h4>
-                            <p className="text-sm text-gray-400">Video Link: youtube.com/watch?v=...</p>
-                            <p className="text-sm text-green-400 font-medium">Views: 500K+</p>
+                            <p className="text-sm text-gray-400">{t("inf.videoLink")}: youtube.com/watch?v=...</p>
+                            <p className="text-sm text-green-400 font-medium">{t("inf.views")}: 500K+</p>
                           </div>
                         </div>
                       </div>
@@ -76,40 +78,40 @@ export default function InfluencerDashboard() {
 
         {/* Dashboard Actions */}
         <div className="space-y-4">
-          <h2 className="text-xl font-display font-bold px-2">My Ads</h2>
+          <h2 className="text-xl font-display font-bold px-2">{t("inf.myAds")}</h2>
           
           <div className="space-y-4">
-            <Button variant="secondary" className="w-full h-auto py-4 px-6 justify-between bg-[#2A2A2A] hover:bg-[#333] text-white border-l-4 border-red-500 group">
+            <Button variant="secondary" className="w-full h-auto py-4 px-6 justify-between bg-[#2A2A2A] hover:bg-[#333] text-white border-l-4 border-red-500 group rtl:border-l-0 rtl:border-r-4">
               <div className="flex items-center gap-3">
                 <Briefcase className="h-5 w-5 text-red-500" />
-                <div className="text-left">
-                  <span className="block font-medium text-lg group-hover:underline decoration-red-500 underline-offset-4">New Requests</span>
-                  <span className="text-xs text-gray-400">2 pending approvals</span>
+                <div className="text-left rtl:text-right">
+                  <span className="block font-medium text-lg group-hover:underline decoration-red-500 underline-offset-4">{t("inf.newRequests")}</span>
+                  <span className="text-xs text-gray-400">2 {t("inf.pending")}</span>
                 </div>
               </div>
-              <ChevronDown className="-rotate-90 h-5 w-5 text-gray-500" />
+              <ChevronDown className="-rotate-90 h-5 w-5 text-gray-500 rtl:rotate-90" />
             </Button>
 
-            <Button variant="secondary" className="w-full h-auto py-4 px-6 justify-between bg-[#2A2A2A] hover:bg-[#333] text-white border-l-4 border-yellow-500 group">
+            <Button variant="secondary" className="w-full h-auto py-4 px-6 justify-between bg-[#2A2A2A] hover:bg-[#333] text-white border-l-4 border-yellow-500 group rtl:border-l-0 rtl:border-r-4">
               <div className="flex items-center gap-3">
                 <Clock className="h-5 w-5 text-yellow-500" />
-                <div className="text-left">
-                  <span className="block font-medium text-lg group-hover:underline decoration-yellow-500 underline-offset-4">Ads in Progress</span>
-                  <span className="text-xs text-gray-400">1 active campaign</span>
+                <div className="text-left rtl:text-right">
+                  <span className="block font-medium text-lg group-hover:underline decoration-yellow-500 underline-offset-4">{t("inf.inProgress")}</span>
+                  <span className="text-xs text-gray-400">1 {t("inf.active")}</span>
                 </div>
               </div>
-              <ChevronDown className="-rotate-90 h-5 w-5 text-gray-500" />
+              <ChevronDown className="-rotate-90 h-5 w-5 text-gray-500 rtl:rotate-90" />
             </Button>
 
-            <Button variant="secondary" className="w-full h-auto py-4 px-6 justify-between bg-[#2A2A2A] hover:bg-[#333] text-white border-l-4 border-green-500 group">
+            <Button variant="secondary" className="w-full h-auto py-4 px-6 justify-between bg-[#2A2A2A] hover:bg-[#333] text-white border-l-4 border-green-500 group rtl:border-l-0 rtl:border-r-4">
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="h-5 w-5 text-green-500" />
-                <div className="text-left">
-                  <span className="block font-medium text-lg group-hover:underline decoration-green-500 underline-offset-4">Completed Ads</span>
-                  <span className="text-xs text-gray-400">15 successful campaigns</span>
+                <div className="text-left rtl:text-right">
+                  <span className="block font-medium text-lg group-hover:underline decoration-green-500 underline-offset-4">{t("inf.completed")}</span>
+                  <span className="text-xs text-gray-400">15 {t("inf.successful")}</span>
                 </div>
               </div>
-              <ChevronDown className="-rotate-90 h-5 w-5 text-gray-500" />
+              <ChevronDown className="-rotate-90 h-5 w-5 text-gray-500 rtl:rotate-90" />
             </Button>
           </div>
         </div>
