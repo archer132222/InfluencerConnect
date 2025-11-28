@@ -2,6 +2,9 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import session from "express-session";
+import ConnectPgSimple from "connect-pg-simple";
+import { neon } from "@neondatabase/serverless";
 
 const app = express();
 const httpServer = createServer(app);
@@ -11,6 +14,34 @@ declare module "http" {
     rawBody: unknown;
   }
 }
+
+declare module "express-session" {
+  interface SessionData {
+    userId?: string;
+    userRole?: "customer" | "influencer";
+  }
+}
+
+// Session setup
+const pgSession = ConnectPgSimple(session);
+const sql = neon(process.env.DATABASE_URL || "");
+
+app.use(
+  session({
+    store: new pgSession({
+      pool: sql,
+      tableName: "session",
+    }),
+    secret: process.env.SESSION_SECRET || "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
 
 app.use(
   express.json({

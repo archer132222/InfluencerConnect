@@ -7,19 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Navbar } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import * as api from "@/lib/api";
 
 export default function Login() {
-  const { login, isLoading } = useUser();
+  const { setUser, setIsLoading, isLoading } = useUser();
   const { t } = useLanguage();
   const [, setLocation] = useLocation();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{email?: string, password?: string}>({});
+  const [errors, setErrors] = useState<{email?: string, password?: string, general?: string}>({});
 
   const validate = () => {
-    const newErrors: {email?: string, password?: string} = {};
+    const newErrors: any = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     
     if (!email || !emailRegex.test(email)) {
@@ -34,18 +34,24 @@ export default function Login() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!validate()) return;
 
-    // Mock logic: emails containing "inf" or "omar" are influencers, others are brands
-    const role = (email.toLowerCase().includes('inf') || email.toLowerCase().includes('omar')) 
-      ? 'influencer' 
-      : 'customer';
-
-    login(role);
-    setTimeout(() => {
-      setLocation(role === 'influencer' ? '/influencer-dashboard' : '/customer-dashboard');
-    }, 900);
+    setIsLoading(true);
+    try {
+      const user = await api.login(email, password);
+      setUser({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      });
+      setLocation(user.role === 'influencer' ? '/influencer-dashboard' : '/customer-dashboard');
+    } catch (error: any) {
+      setErrors({ general: error.message || 'Login failed' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -58,6 +64,12 @@ export default function Login() {
             <p className="text-sm text-gray-400">{t("auth.signIn.subtitle")}</p>
           </CardHeader>
           <CardContent className="space-y-6">
+            {errors.general && (
+              <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-600">{errors.general}</p>
+              </div>
+            )}
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">{t("auth.email")}</label>

@@ -29,7 +29,7 @@ export default function CreateAd() {
     }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < 2) {
       setStep(step + 1);
     } else {
@@ -39,8 +39,17 @@ export default function CreateAd() {
         saveAdFormData(formData);
         setLocation('/register');
       } else {
-        // User is signed in - allow submission
-        setLocation('/customer-dashboard');
+        // User is signed in - create campaign
+        try {
+          await fetch('/api/campaigns', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData),
+          });
+          setLocation('/customer-dashboard');
+        } catch (error) {
+          console.error('Failed to create campaign:', error);
+        }
       }
     }
   };

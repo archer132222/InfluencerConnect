@@ -8,9 +8,10 @@ import { Navbar } from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import * as api from "@/lib/api";
 
 export default function Register() {
-  const { login, isLoading, adFormData, clearAdFormData } = useUser();
+  const { setUser, setIsLoading, isLoading, adFormData, clearAdFormData } = useUser();
   const { t } = useLanguage();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<"customer" | "influencer">("customer");
@@ -21,7 +22,7 @@ export default function Register() {
     password: "",
     category: ""
   });
-  const [errors, setErrors] = useState<{fullName?: string, email?: string, password?: string, category?: string}>({});
+  const [errors, setErrors] = useState<{fullName?: string, email?: string, password?: string, category?: string, general?: string}>({});
 
   const validate = () => {
     const newErrors: any = {};
@@ -44,14 +45,31 @@ export default function Register() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!validate()) return;
 
-    login(activeTab);
-    setTimeout(() => {
+    setIsLoading(true);
+    try {
+      const user = await api.register(
+        formData.fullName,
+        formData.email,
+        formData.password,
+        activeTab,
+        activeTab === 'influencer' ? formData.category : undefined
+      );
+      setUser({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      });
       setLocation(activeTab === 'influencer' ? '/influencer-dashboard' : '/customer-dashboard');
       clearAdFormData();
-    }, 900);
+    } catch (error: any) {
+      setErrors({ general: error.message || 'Registration failed' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (field: string, value: string) => {
@@ -71,6 +89,12 @@ export default function Register() {
             <p className="text-sm text-gray-400">{t("auth.createAccount.subtitle")}</p>
           </CardHeader>
           <CardContent className="space-y-6">
+            {errors.general && (
+              <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-600">{errors.general}</p>
+              </div>
+            )}
             {adFormData && (
               <div className="bg-green-500/10 border border-green-500/20 p-3 rounded-lg flex items-start gap-2">
                 <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
