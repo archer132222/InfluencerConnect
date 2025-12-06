@@ -1,3 +1,14 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useState, useEffect } from "react";
 import { useUser } from "@/lib/store";
 import { useLanguage } from "@/lib/i18n";
@@ -174,14 +185,36 @@ export function Navbar() {
                     {t("nav.dashboard")}
                   </Button>
                 </Link>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleLogout}
-                  className="text-white hover:bg-white/10 hover:text-white"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-white hover:bg-white/10 hover:text-white"
+                    >
+                      <LogOut className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-[#1a1a1a] border-white/10 text-white">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Sign out?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-gray-400">
+                        Are you sure you want to sign out of your account?
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="bg-transparent text-white hover:bg-white/10 border-white/10">
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={handleLogout} 
+                        className="bg-red-600 hover:bg-red-700 text-white border-none"
+                      >
+                        Sign out
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </>
             ) : (
               <>
@@ -282,14 +315,37 @@ export function Navbar() {
                         </Link>
                       )}
 
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start text-red-400 hover:bg-red-900/20 hover:text-red-300"
-                        onClick={handleLogout}
-                      >
-                        <LogOut className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                        {t("nav.signOut")}
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full justify-start text-red-400 hover:bg-red-900/20 hover:text-red-300"
+                          >
+                            <LogOut className="h-4 w-4 mr-2 rtl:ml-2 rtl:mr-0" />
+                            {t("nav.signOut")}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="bg-[#1a1a1a] border-white/10 text-white">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Sign out?</AlertDialogTitle>
+                            <AlertDialogDescription className="text-gray-400">
+                              Are you sure you want to sign out of your account?
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="bg-transparent text-white hover:bg-white/10 border-white/10">
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={handleLogout} 
+                              className="bg-red-600 hover:bg-red-700 text-white border-none"
+                            >
+                              Sign out
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </>
                   ) : (
                     <>
