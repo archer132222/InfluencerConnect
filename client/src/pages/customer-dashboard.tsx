@@ -182,6 +182,18 @@ export default function CustomerDashboard() {
                   </div>
                   <ChevronDown className="-rotate-90 h-5 w-5 text-gray-500 rtl:rotate-90" />
                 </Button>
+                <Link href="/messages">
+                  <Button variant="secondary" className="w-full h-auto py-4 px-6 justify-between bg-[#2A2A2A] hover:bg-[#333] text-white border-l-4 border-red-500 group rtl:border-l-0 rtl:border-r-4">
+                    <div className="flex items-center gap-3">
+                      <MessageSquare className="h-5 w-5 text-red-400" />
+                      <div className="text-left rtl:text-right">
+                        <span className="block font-medium text-lg group-hover:underline decoration-red-500 underline-offset-4">Messages</span>
+                        <span className="text-xs text-gray-400">Contact influencers</span>
+                      </div>
+                    </div>
+                    <ChevronDown className="-rotate-90 h-5 w-5 text-gray-500 rtl:rotate-90" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
