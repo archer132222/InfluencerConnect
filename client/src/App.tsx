@@ -13,6 +13,7 @@ import CreateAd from "@/pages/create-ad";
 import InfluencerProfile from "@/pages/influencer-profile";
 import ContactAdmin from "@/pages/contact-admin";
 import Support from "@/pages/support";
+import Messages from "@/pages/messages";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/profile/:id" component={InfluencerProfile} />
       <Route path="/contact-admin" component={ContactAdmin} />
       <Route path="/support" component={Support} />
+      <Route path="/messages" component={Messages} />
       <Route component={NotFound} />
     </Switch>
   );

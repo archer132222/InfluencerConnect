@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLocation } from "wouter";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronRight, ChevronLeft, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { useUser } from "@/lib/store";
 
@@ -22,15 +22,38 @@ export default function CreateAd() {
     platform: ""
   });
 
+  const [errors, setErrors] = useState<{productName?: string, productDesc?: string, targetAudience?: string}>({});
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+    if (errors[field as keyof typeof errors]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const validateStep1 = () => {
+    const newErrors: typeof errors = {};
+    
+    if (!formData.productName.trim()) {
+      newErrors.productName = "Product name is required";
+    }
+    if (!formData.productDesc.trim()) {
+      newErrors.productDesc = "Product description is required";
+    }
+    if (!formData.targetAudience.trim()) {
+      newErrors.targetAudience = "Target audience is required";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleNext = async () => {
     if (step < 2) {
+      if (!validateStep1()) return;
       setStep(step + 1);
     } else {
       // Submit
@@ -72,37 +95,52 @@ export default function CreateAd() {
             {step === 1 && (
               <div className="space-y-6 animate-in slide-in-from-right duration-300">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300">{t("ad.productName")}</label>
+                  <label className="text-sm font-medium text-gray-300">{t("ad.productName")} <span className="text-red-500">*</span></label>
                   <Input 
-                    className="bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 focus:border-red-500/50" 
+                    className={`bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 focus:border-red-500/50 ${errors.productName ? "border-red-500" : ""}`}
                     placeholder="Ex: Luxury Perfume Bottle" 
                     value={formData.productName}
                     onChange={(e) => handleInputChange('productName', e.target.value)}
                   />
+                  {errors.productName && (
+                    <p className="text-xs text-red-500 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" /> {errors.productName}
+                    </p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300">{t("ad.productDesc")}</label>
+                  <label className="text-sm font-medium text-gray-300">{t("ad.productDesc")} <span className="text-red-500">*</span></label>
                   <Textarea 
-                    className="bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 min-h-[100px] focus:border-red-500/50" 
+                    className={`bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 min-h-[100px] focus:border-red-500/50 ${errors.productDesc ? "border-red-500" : ""}`}
                     placeholder="Ex: A new fragrance for women, floral scent..." 
                     value={formData.productDesc}
                     onChange={(e) => handleInputChange('productDesc', e.target.value)}
                   />
+                  {errors.productDesc && (
+                    <p className="text-xs text-red-500 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" /> {errors.productDesc}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300">{t("ad.targetAudience")}</label>
+                  <label className="text-sm font-medium text-gray-300">{t("ad.targetAudience")} <span className="text-red-500">*</span></label>
                   <Input 
-                    className="bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 focus:border-red-500/50" 
+                    className={`bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 focus:border-red-500/50 ${errors.targetAudience ? "border-red-500" : ""}`}
                     placeholder="Ex: Women 20-40 years old" 
                     value={formData.targetAudience}
                     onChange={(e) => handleInputChange('targetAudience', e.target.value)}
                   />
+                  {errors.targetAudience && (
+                    <p className="text-xs text-red-500 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" /> {errors.targetAudience}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-300">{t("ad.platform")}</label>
+                  <label className="text-sm font-medium text-gray-300">{t("ad.platform")} <span className="text-gray-500 text-xs">(optional)</span></label>
                   <Input 
                     className="bg-[#2A2A2A] border-white/10 text-white placeholder:text-gray-500 focus:border-red-500/50" 
                     placeholder="Ex: TikTok, Instagram" 

@@ -86,12 +86,6 @@ export default function InfluencerProfile() {
                       </span>
                     </div>
                   </div>
-                  
-                  <div className="flex gap-2">
-                    <Button className="bg-red-600 hover:bg-red-700 text-white">
-                      {language === 'ar' ? "تواصل معي" : "Contact Me"}
-                    </Button>
-                  </div>
                 </div>
               </div>
             </div>

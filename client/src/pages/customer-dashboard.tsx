@@ -14,7 +14,8 @@ import {
   Video,
   BarChart3,
   DollarSign,
-  Calendar
+  Calendar,
+  MessageSquare
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 
@@ -69,8 +70,9 @@ export default function CustomerDashboard() {
 
                     <div className="flex flex-col gap-2 w-full md:w-auto">
                       <Button variant="outline" className="border-white/10 hover:bg-white/10 text-white">View Timeline</Button>
-                      <Button className="bg-white text-black hover:bg-gray-200">Message</Button>
-                    </div>
+                      <Link href="/messages">
+                        <Button className="bg-white text-black hover:bg-gray-200 w-full">Message</Button>
+                      </Link>                    </div>
                   </div>
                 </CardContent>
               </Card>
