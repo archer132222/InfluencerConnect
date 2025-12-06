@@ -6,7 +6,7 @@ import { rm, readFile } from "fs/promises";
 // which helps cold start times
 const allowlist = [
   "@google/generative-ai",
-  "better-sqlite3",
+  //"better-sqlite3",
   "axios",
   "cors",
   "date-fns",
