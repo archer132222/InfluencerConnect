@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
+  "packageManager": "npm@10.8.2",
   "engines": {
     "node": ">=20.19.0",
     "npm": ">=10.0.0"
@@ -108,6 +109,6 @@
     "vite": "^7.1.9"
   },
   "optionalDependencies": {
-    "bufferutil": "^4.0.8"
+    "bufferutil": "^4.0.9"
   }
 }
