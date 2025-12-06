@@ -4,6 +4,11 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import session from "express-session";
 import MemoryStore from "memorystore";
+import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import path from "path";
+import { db } from "./db"; // Adjust path to where your db.ts is
+
+
 
 const app = express();
 const httpServer = createServer(app);
@@ -86,6 +91,24 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+
+  if (process.env.NODE_ENV === "production") {
+    try {
+      console.log("Running DB migrations...");
+      
+      // In production, __dirname is 'dist', so we look for 'dist/drizzle'
+      const migrationsFolder = path.join(__dirname, "migrations");
+    
+      migrate(db, { migrationsFolder });
+      
+      console.log("Migrations completed successfully!");
+    } catch (err) {
+      console.error("Migration failed:", err);
+      // Optional: process.exit(1) if you want the app to crash on failure
+    }
+  }
+
+
   await registerRoutes(httpServer, app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

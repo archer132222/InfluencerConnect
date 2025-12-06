@@ -1,6 +1,7 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile } from "fs/promises";
+import { rm, readFile, cp } from "fs/promises";
+
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -58,6 +59,12 @@ async function buildAll() {
     external: externals,
     logLevel: "info",
   });
+
+
+  console.log("Copying migrations...");
+  // This copies the 'drizzle' folder to 'dist/drizzle'
+  await cp("migrations", "dist/migrations", { recursive: true });
+  
 }
 
 buildAll().catch((err) => {
