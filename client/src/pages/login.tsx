@@ -48,7 +48,13 @@ export default function Login() {
       });
       setLocation(user.role === 'influencer' ? '/influencer-dashboard' : '/customer-dashboard');
     } catch (error: any) {
-      setErrors({ general: error.message || 'Login failed' });
+      const errorMessage = error.message || 'Login failed';
+      // Show user-friendly message for invalid credentials
+      if (errorMessage.includes('Invalid credentials')) {
+        setErrors({ general: 'The email or password you entered is incorrect. Please try again.' });
+      } else {
+        setErrors({ general: errorMessage });
+      }
     } finally {
       setIsLoading(false);
     }

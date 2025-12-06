@@ -45,12 +45,12 @@ export async function registerRoutes(
       const user = await storage.getUserByEmail(email);
 
       if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
+        return res.status(401).json({ error: "The email or password you entered is incorrect. Please try again." });
       }
 
       const passwordMatch = await bcrypt.compare(password, user.password);
       if (!passwordMatch) {
-        return res.status(401).json({ error: "Invalid credentials" });
+        return res.status(401).json({ error: "The email or password you entered is incorrect. Please try again." });
       }
 
       (req.session as any).userId = user.id;

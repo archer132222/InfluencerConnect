@@ -1,102 +1,95 @@
-import { sql } from "drizzle-orm";
 import {
-  pgTable,
+  sqliteTable,
   text,
-  varchar,
   integer,
-  timestamp,
-  boolean,
-  jsonb,
-} from "drizzle-orm/pg-core";
+} from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id")
+export const users = sqliteTable("users", {
+  id: text("id")
     .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  email: varchar("email").notNull().unique(),
+    .$defaultFn(() => crypto.randomUUID()),
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
   name: text("name").notNull(),
-  role: varchar("role", { enum: ["customer", "influencer"] }).notNull(),
+  role: text("role", { enum: ["customer", "influencer"] }).notNull(),
   avatar: text("avatar"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
 
-export const influencers = pgTable("influencers", {
-  id: varchar("id")
+export const influencers = sqliteTable("influencers", {
+  id: text("id")
     .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  userId: varchar("user_id")
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
     .notNull()
     .references(() => users.id),
-  category: varchar("category").notNull(),
-  followers: varchar("followers"),
-  rating: varchar("rating").default("4.9"),
+  category: text("category").notNull(),
+  followers: text("followers"),
+  rating: text("rating").default("4.9"),
   bio: text("bio"),
-  platforms: text("platforms")
-    .array()
-    .default(sql`'{}'::text[]`),
+  platforms: text("platforms", { mode: "json" }).$defaultFn(() => []),
 });
 
-export const campaigns = pgTable("campaigns", {
-  id: varchar("id")
+export const campaigns = sqliteTable("campaigns", {
+  id: text("id")
     .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  brandId: varchar("brand_id")
+    .$defaultFn(() => crypto.randomUUID()),
+  brandId: text("brand_id")
     .notNull()
     .references(() => users.id),
   productName: text("product_name").notNull(),
   productDesc: text("product_desc"),
   targetAudience: text("target_audience"),
-  platform: varchar("platform"),
-  status: varchar("status", { enum: ["draft", "active", "completed"] }).default(
+  platform: text("platform"),
+  status: text("status", { enum: ["draft", "active", "completed"] }).default(
     "draft",
   ),
   budget: integer("budget"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
 
-export const campaignRequests = pgTable("campaign_requests", {
-  id: varchar("id")
+export const campaignRequests = sqliteTable("campaign_requests", {
+  id: text("id")
     .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  campaignId: varchar("campaign_id")
+    .$defaultFn(() => crypto.randomUUID()),
+  campaignId: text("campaign_id")
     .notNull()
     .references(() => campaigns.id),
-  influencerId: varchar("influencer_id")
+  influencerId: text("influencer_id")
     .notNull()
     .references(() => users.id),
-  status: varchar("status", {
+  status: text("status", {
     enum: ["pending", "accepted", "rejected", "completed"],
   }).default("pending"),
   budget: integer("budget"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
 
-export const messages = pgTable("messages", {
-  id: varchar("id")
+export const messages = sqliteTable("messages", {
+  id: text("id")
     .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  senderId: varchar("sender_id")
+    .$defaultFn(() => crypto.randomUUID()),
+  senderId: text("sender_id")
     .notNull()
     .references(() => users.id),
   subject: text("subject").notNull(),
   content: text("content").notNull(),
-  status: varchar("status", { enum: ["unread", "read"] }).default("unread"),
-  createdAt: timestamp("created_at").defaultNow(),
+  status: text("status", { enum: ["unread", "read"] }).default("unread"),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
 
-export const supportTickets = pgTable("support_tickets", {
-  id: varchar("id")
+export const supportTickets = sqliteTable("support_tickets", {
+  id: text("id")
     .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id),
-  email: varchar("email").notNull(),
-  issueType: varchar("issue_type", { enum: ["feedback", "bug_report", "other"] }).notNull(),
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").references(() => users.id),
+  email: text("email").notNull(),
+  issueType: text("issue_type", { enum: ["feedback", "bug_report", "other"] }).notNull(),
   subject: text("subject").notNull(),
   description: text("description").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
 
 // Zod schemas

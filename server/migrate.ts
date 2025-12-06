@@ -1,14 +1,14 @@
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import Database from "better-sqlite3";
 import * as schema from "../shared/schema";
 
-const databaseUrl = process.env.DATABASE_URL || "";
+const dbPath = process.env.DATABASE_PATH || "./database.sqlite";
 
-async function main() {
-  const sql = neon(databaseUrl);
-  const db = drizzle(sql, { schema });
+function main() {
+  const sqlite = new Database(dbPath);
+  const db = drizzle(sqlite, { schema });
 
   console.log("Database schema ready");
 }
 
-main().catch(console.error);
+main();

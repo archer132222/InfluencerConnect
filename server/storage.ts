@@ -116,7 +116,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(influencers.userId, users.id))
       .where(eq(campaignRequests.campaignId, campaignId));
     return result.map(r => ({
-      ...r.campaign_requests,
+      ...r.campaign_requests!,
       influencer: { ...r.influencers!, user: r.users! }
     }));
   }
