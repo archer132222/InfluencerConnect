@@ -10,3 +10,4 @@ database.sqlite
 .env
 .env.local
 .env.*.local
+.local
