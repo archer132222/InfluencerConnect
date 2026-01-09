@@ -1,24 +1,28 @@
 import {
-  sqliteTable,
+  pgTable,
   text,
+  serial,
   integer,
-} from "drizzle-orm/sqlite-core";
+  timestamp,
+  json,
+  boolean,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = sqliteTable("users", {
+export const users = pgTable("users", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   name: text("name").notNull(),
-  role: text("role", { enum: ["customer", "influencer"] }).notNull(),
+  role: text("role").notNull(), // Enums handled by Zod/App logic
   avatar: text("avatar"),
-  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const influencers = sqliteTable("influencers", {
+export const influencers = pgTable("influencers", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -29,10 +33,10 @@ export const influencers = sqliteTable("influencers", {
   followers: text("followers"),
   rating: text("rating").default("4.9"),
   bio: text("bio"),
-  platforms: text("platforms", { mode: "json" }).$defaultFn(() => []),
+  platforms: json("platforms").$defaultFn(() => []), // Native Postgres JSON type
 });
 
-export const campaigns = sqliteTable("campaigns", {
+export const campaigns = pgTable("campaigns", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -43,14 +47,12 @@ export const campaigns = sqliteTable("campaigns", {
   productDesc: text("product_desc"),
   targetAudience: text("target_audience"),
   platform: text("platform"),
-  status: text("status", { enum: ["draft", "active", "completed"] }).default(
-    "draft",
-  ),
+  status: text("status").default("draft"),
   budget: integer("budget"),
-  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const campaignRequests = sqliteTable("campaign_requests", {
+export const campaignRequests = pgTable("campaign_requests", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -60,14 +62,12 @@ export const campaignRequests = sqliteTable("campaign_requests", {
   influencerId: text("influencer_id")
     .notNull()
     .references(() => users.id),
-  status: text("status", {
-    enum: ["pending", "accepted", "rejected", "completed"],
-  }).default("pending"),
+  status: text("status").default("pending"),
   budget: integer("budget"),
-  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const messages = sqliteTable("messages", {
+export const messages = pgTable("messages", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -76,26 +76,28 @@ export const messages = sqliteTable("messages", {
     .references(() => users.id),
   subject: text("subject").notNull(),
   content: text("content").notNull(),
-  status: text("status", { enum: ["unread", "read"] }).default("unread"),
-  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+  status: text("status").default("unread"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const supportTickets = sqliteTable("support_tickets", {
+export const supportTickets = pgTable("support_tickets", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id").references(() => users.id),
   email: text("email").notNull(),
-  issueType: text("issue_type", { enum: ["feedback", "bug_report", "other"] }).notNull(),
+  issueType: text("issue_type").notNull(),
   subject: text("subject").notNull(),
   description: text("description").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Zod schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
+}).extend({
+  role: z.enum(["customer", "influencer"]), // Validating enums here
 });
 
 export const insertInfluencerSchema = createInsertSchema(influencers).omit({
@@ -105,13 +107,15 @@ export const insertInfluencerSchema = createInsertSchema(influencers).omit({
 export const insertCampaignSchema = createInsertSchema(campaigns).omit({
   id: true,
   createdAt: true,
+}).extend({
+  status: z.enum(["draft", "active", "completed"]).optional(),
 });
 
-export const insertCampaignRequestSchema = createInsertSchema(
-  campaignRequests,
-).omit({
+export const insertCampaignRequestSchema = createInsertSchema(campaignRequests).omit({
   id: true,
   createdAt: true,
+}).extend({
+  status: z.enum(["pending", "accepted", "rejected", "completed"]).optional(),
 });
 
 export const insertMessageSchema = createInsertSchema(messages).omit({
@@ -123,6 +127,8 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
 export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
   id: true,
   createdAt: true,
+}).extend({
+  issueType: z.enum(["feedback", "bug_report", "other"]),
 });
 
 // Types
