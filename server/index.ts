@@ -1,11 +1,21 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { serveStatic } from "./static";
 import { createServer } from "http";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import path from "path";
+
+// ✅ THIS MUST BE HERE (Define __dirname for ES Modules)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+
+import { serveStatic } from "./static";
+
 import session from "express-session";
 import MemoryStore from "memorystore";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
-import path from "path";
+
 import { db } from "./db"; // Adjust path to where your db.ts is
 
 
@@ -91,23 +101,26 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-
+  // 2. USE THIS CORRECTED BLOCK
   if (process.env.NODE_ENV === "production") {
     try {
       console.log("Running DB migrations...");
+
+      // Go UP one level ("..") because server/index.ts is inside "server/"
+      // but the "migrations" folder is in the project root.
+      const migrationsFolder = path.join(__dirname, "..", "migrations");
       
-      // In production, __dirname is 'dist', so we look for 'dist/drizzle'
-      const migrationsFolder = path.join(__dirname, "migrations");
-    
-      migrate(db, { migrationsFolder });
+      console.log(`Looking for migrations in: ${migrationsFolder}`); // Debug log
+
+      await migrate(db, { migrationsFolder });
       
       console.log("Migrations completed successfully!");
     } catch (err) {
       console.error("Migration failed:", err);
-      // Optional: process.exit(1) if you want the app to crash on failure
+      // It is often safer to exit if migrations fail, so the bad app instance doesn't stay alive
+      process.exit(1); 
     }
   }
-
 
   await registerRoutes(httpServer, app);
 
